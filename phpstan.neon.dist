@@ -1,0 +1,18 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    # Analyse as the oldest PHP the plugin supports: flags newer syntax even on a newer local PHP. It does NOT catch
+    # newer functions or constants (they exist in the PHP running PHPStan): CI's run on PHP 8.1 does.
+    phpVersion: 80100
+    level: max
+    paths:
+        - ketapay-woocommerce.php
+        - src
+        - tests
+    scanFiles:
+        - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+        - vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+    tmpDir: .phpstan-cache
+    # Settings and webhook payloads are checked at runtime: they come from the database and the network.
+    treatPhpDocTypesAsCertain: false

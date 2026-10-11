@@ -1,0 +1,59 @@
+{
+    "name": "ketapay/ketapay-woocommerce",
+    "description": "KetaPay escrow payment gateway for WooCommerce: buyers pay into escrow, the store is paid when they confirm delivery",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "keywords": [
+        "ketapay",
+        "escrow",
+        "payments",
+        "nigeria",
+        "woocommerce",
+        "wordpress",
+        "payment-gateway"
+    ],
+    "homepage": "https://github.com/KetaPay/ketapay-woocommerce",
+    "support": {
+        "issues": "https://github.com/KetaPay/ketapay-woocommerce/issues",
+        "docs": "https://docs.ketapay.com"
+    },
+    "require": {
+        "php": ">=8.1",
+        "ketapay/ketapay-php": "^0.1@beta"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "php-stubs/woocommerce-stubs": "^10.0",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5",
+        "symfony/yaml": "^6.4",
+        "szepeviktor/phpstan-wordpress": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "KetaPay\\WooCommerce\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "KetaPay\\WooCommerce\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.0"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
+        "format": "php-cs-fixer fix",
+        "format:check": "php-cs-fixer fix --dry-run --diff",
+        "lint": "phpstan analyse --memory-limit=1G --no-progress",
+        "test": "phpunit --testsuite unit",
+        "build": "scripts/build.sh",
+        "test:contract": "php scripts/contract-test.php"
+    }
+}

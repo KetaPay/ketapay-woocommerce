@@ -1,0 +1,81 @@
+# Release Please keeps a release PR up to date from conventional commits (feat:, fix:, ...): version
+# bump in the plugin header, Plugin::VERSION and version.txt, plus the changelog. This workflow also
+# syncs readme.txt's "Stable tag" on that PR (it can't carry Release Please markers). Merging the PR
+# tags the version and creates a GitHub release; the full CI suite then runs on the tag and the
+# installable zip is attached to the release. Nothing goes to WordPress.org from here.
+#
+# Switch: repo variable RELEASES_ENABLED=true.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    if: vars.RELEASES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+      pr: ${{ steps.release.outputs.pr && fromJSON(steps.release.outputs.pr).headBranchName || '' }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  stable-tag:
+    name: Sync readme.txt Stable tag on the release PR
+    needs: release-please
+    if: needs.release-please.outputs.pr != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.pr }}
+      - run: |
+          version="$(cat version.txt)"
+          sed -i "s/^Stable tag: .*/Stable tag: $version/" readme.txt
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am "chore: readme.txt stable tag $version"
+          git push
+
+  checks:
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ needs.release-please.outputs.tag }}
+
+  attach-zip:
+    name: Attach the plugin zip to the release
+    needs: [release-please, checks]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+          path: ketapay-woocommerce
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+      - working-directory: ketapay-woocommerce
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+        run: |
+          zip="$(scripts/build.sh | tail -1)"
+          gh release upload "$TAG" "$zip" --clobber

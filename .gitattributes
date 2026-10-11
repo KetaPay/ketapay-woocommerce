@@ -1,0 +1,19 @@
+# GitHub's source archives skip development files; the installable zip comes from scripts/build.sh.
+/.github export-ignore
+/.githooks export-ignore
+/tests export-ignore
+/scripts export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.php-cs-fixer.dist.php export-ignore
+/.wp-env.json export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/phpstan.neon.dist export-ignore
+/phpunit.xml.dist export-ignore
+/phpunit.integration.xml.dist export-ignore
+/release-please-config.json export-ignore
+/.release-please-manifest.json export-ignore
+/version.txt export-ignore
+/CONTRIBUTING.md export-ignore
+/.gitleaks.toml export-ignore

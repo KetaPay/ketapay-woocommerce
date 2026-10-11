@@ -1,0 +1,13 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/wp-env.json",
+    "core": null,
+    "phpVersion": "8.1",
+    "plugins": ["https://downloads.wordpress.org/plugin/woocommerce.zip", "."],
+    "config": {
+        "WP_DEBUG": true,
+        "WP_DEBUG_LOG": true
+    },
+    "lifecycleScripts": {
+        "afterStart": "npx wp-env run tests-cli wp option update woocommerce_currency NGN && npx wp-env run tests-cli wp rewrite structure /%postname%/"
+    }
+}
