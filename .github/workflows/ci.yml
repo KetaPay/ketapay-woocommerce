@@ -57,7 +57,7 @@ jobs:
         with:
           php-version: '8.4'
           coverage: none
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
         with:
           working-directory: ketapay-woocommerce
       - name: composer.json is valid
@@ -91,7 +91,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
         with:
           working-directory: ketapay-woocommerce
       - name: Unit tests
@@ -113,7 +113,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
         with:
           working-directory: ketapay-woocommerce
       - name: Which ketapay-php is installed (its spec isn't in the Packagist package)
@@ -147,7 +147,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
         with:
           working-directory: ketapay-woocommerce
       - uses: actions/setup-node@v7
@@ -185,7 +185,7 @@ jobs:
         working-directory: ketapay-woocommerce/build/ketapay-woocommerce
         run: |
           php -r 'require "vendor/autoload.php"; foreach (["KetaPay\\KetaPay", "KetaPay\\WooCommerce\\Checkout\\SessionParams", "KetaPay\\WooCommerce\\Orders\\EventRules"] as $c) { class_exists($c) or exit("missing $c\n"); } echo "ok\n";'
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: ketapay-woocommerce
           path: ketapay-woocommerce/build/*.zip
