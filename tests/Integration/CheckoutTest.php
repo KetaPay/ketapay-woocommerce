@@ -132,6 +132,9 @@ final class CheckoutTest extends IntegrationTestCase
         $method = $registry->get_registered(Plugin::GATEWAY_ID);
 
         self::assertInstanceOf(PaymentMethod::class, $method);
+        // WooCommerce reads the settings when it registers the method, once per request; this process
+        // registered it before setUp() saved them, so read them again as the next request would.
+        $method->initialize();
         self::assertTrue($method->is_active());
         self::assertSame(['ketapay-wc-blocks'], $method->get_payment_method_script_handles());
         self::assertSame('Pay with KetaPay escrow', $method->get_payment_method_data()['title']);
