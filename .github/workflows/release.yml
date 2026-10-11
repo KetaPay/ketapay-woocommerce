@@ -68,11 +68,6 @@ jobs:
         with:
           ref: ${{ needs.release-please.outputs.tag }}
           path: ketapay-woocommerce
-      - uses: actions/checkout@v7
-        with:
-          repository: KetaPay/ketapay-php
-          ref: main
-          path: ketapay-php
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'

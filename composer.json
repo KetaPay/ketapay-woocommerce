@@ -29,18 +29,6 @@
         "symfony/yaml": "^6.4",
         "szepeviktor/phpstan-wordpress": "^2.0"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../ketapay-php",
-            "options": {
-                "symlink": false,
-                "versions": {
-                    "ketapay/ketapay-php": "0.1.0-beta.1"
-                }
-            }
-        }
-    ],
     "autoload": {
         "psr-4": {
             "KetaPay\\WooCommerce\\": "src/"

@@ -9,7 +9,7 @@ composer install   # also points git at .githooks (pre-push)
 npm install        # wp-env, for the integration tests
 ```
 
-Until ketapay-php is on Packagist, `composer.json` reads it from `../ketapay-php` (copied, not symlinked, so the plugin zip has real files). Check it out next to this repo.
+ketapay-php comes from Packagist (`^0.1@beta`). The contract tests need the API spec, which isn't in the Packagist package: they read `../ketapay-php/spec/v1.yaml` (check ketapay-php out next to this repo) or `KETAPAY_SPEC`. CI checks out the spec of the installed release.
 
 ## Checks
 

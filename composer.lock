@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ccf96c25d37eac2d5817b28be00b9f5a",
+    "content-hash": "b8c6948333608c9b81a029fbe51865f8",
     "packages": [
         {
             "name": "ketapay/ketapay-php",
-            "version": "0.1.0-beta.1",
+            "version": "v0.1.0-beta.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/KetaPay/ketapay-php.git",
+                "reference": "58f803e2a4348a8ecce9b7a654a5d3100f430dfa"
+            },
             "dist": {
-                "type": "path",
-                "url": "../ketapay-php",
-                "reference": "2c083f857af19c885c10dcf37f3775f6719a46ec"
+                "type": "zip",
+                "url": "https://api.github.com/repos/KetaPay/ketapay-php/zipball/58f803e2a4348a8ecce9b7a654a5d3100f430dfa",
+                "reference": "58f803e2a4348a8ecce9b7a654a5d3100f430dfa",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.1"
@@ -36,86 +42,26 @@
                     "KetaPay\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "KetaPay\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true"
-                ],
-                "sync-spec": [
-                    "php scripts/sync-spec.php"
-                ],
-                "generate": [
-                    "php scripts/generate.php"
-                ],
-                "check:spec": [
-                    "php scripts/check-spec.php"
-                ],
-                "check:drift": [
-                    "php scripts/check-drift.php"
-                ],
-                "format": [
-                    "php-cs-fixer fix"
-                ],
-                "format:check": [
-                    "php-cs-fixer fix --dry-run --diff"
-                ],
-                "lint": [
-                    "phpstan analyse --memory-limit=1G --no-progress",
-                    "phpstan analyse --memory-limit=1G --no-progress -c phpstan-scripts.neon"
-                ],
-                "test": [
-                    "phpunit --testsuite unit"
-                ],
-                "test:coverage": [
-                    "XDEBUG_MODE=coverage phpunit --testsuite unit --coverage-html coverage --coverage-clover coverage/clover.xml"
-                ],
-                "test:ci": [
-                    "phpunit --testsuite unit --coverage-clover coverage/clover.xml --coverage-html coverage --log-junit reports/unit.xml --testdox-text reports/unit-testdox.txt"
-                ],
-                "test:coverage-check": [
-                    "php scripts/check-coverage.php"
-                ],
-                "test:contract": [
-                    "php scripts/contract-test.php"
-                ],
-                "test:e2e": [
-                    "phpunit --testsuite e2e"
-                ],
-                "test:catalogue": [
-                    "phpunit --filter CatalogueCoverageTest"
-                ],
-                "test:report": [
-                    "php scripts/test-summary.php"
-                ],
-                "smoke:package": [
-                    "php scripts/smoke-package.php"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "Official PHP library for the KetaPay escrow API",
             "homepage": "https://github.com/KetaPay/ketapay-php",
             "keywords": [
+                "Nigeria",
                 "api",
                 "escrow",
                 "ketapay",
-                "nigeria",
                 "payments",
                 "sdk"
             ],
             "support": {
+                "docs": "https://docs.ketapay.com",
                 "issues": "https://github.com/KetaPay/ketapay-php/issues",
-                "docs": "https://docs.ketapay.com"
+                "source": "https://github.com/KetaPay/ketapay-php/tree/v0.1.0-beta.1"
             },
-            "transport-options": {
-                "symlink": false,
-                "relative": true
-            }
+            "time": "2026-10-11T13:13:30+00:00"
         }
     ],
     "packages-dev": [

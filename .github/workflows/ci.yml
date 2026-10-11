@@ -14,8 +14,6 @@ on:
 permissions:
   contents: read
 
-# Until ketapay/ketapay-php is on Packagist, composer.json reads it from ../ketapay-php, so the jobs
-# check it out next to this repo. Once it is published, drop the path repository and that checkout.
 jobs:
   pr-title:
     name: PR title
@@ -55,11 +53,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           path: ketapay-woocommerce
-      - uses: actions/checkout@v7
-        with:
-          repository: KetaPay/ketapay-php
-          ref: main
-          path: ketapay-php
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
@@ -94,11 +87,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           path: ketapay-woocommerce
-      - uses: actions/checkout@v7
-        with:
-          repository: KetaPay/ketapay-php
-          ref: main
-          path: ketapay-php
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -118,11 +106,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           path: ketapay-woocommerce
-      - uses: actions/checkout@v7
-        with:
-          repository: KetaPay/ketapay-php
-          ref: main
-          path: ketapay-php
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
@@ -133,6 +116,17 @@ jobs:
       - uses: ramsey/composer-install@v3
         with:
           working-directory: ketapay-woocommerce
+      - name: Which ketapay-php is installed (its spec isn't in the Packagist package)
+        id: sdk
+        working-directory: ketapay-woocommerce
+        run: echo "ref=$(composer show ketapay/ketapay-php --format=json | php -r 'echo json_decode(stream_get_contents(STDIN), true)["versions"][0];')" >> "$GITHUB_OUTPUT"
+      - name: The spec of that exact ketapay-php release
+        uses: actions/checkout@v7
+        with:
+          repository: KetaPay/ketapay-php
+          ref: ${{ steps.sdk.outputs.ref }}
+          path: ketapay-php
+          sparse-checkout: spec
       - name: Every request the plugin makes, against a Prism mock of the SDK's spec copy
         working-directory: ketapay-woocommerce
         run: composer test:contract -- --no-progress --testdox
@@ -149,11 +143,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           path: ketapay-woocommerce
-      - uses: actions/checkout@v7
-        with:
-          repository: KetaPay/ketapay-php
-          ref: main
-          path: ketapay-php
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -185,11 +174,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           path: ketapay-woocommerce
-      - uses: actions/checkout@v7
-        with:
-          repository: KetaPay/ketapay-php
-          ref: main
-          path: ketapay-php
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
