@@ -132,8 +132,9 @@ final class OrderSync
 
     /**
      * Escrows and checkout sessions carry the order id in their metadata. Disputes, payouts, refunds
-     * and chargebacks carry the escrow id: found through the order that recorded it, or, when that
-     * event came first, through the escrow's own metadata.
+     * and chargebacks carry only the escrow id, so the escrow is fetched for its metadata. Not looked
+     * up through order meta: wc_get_orders ignores `meta_query` on some order storage setups and
+     * returns the latest order instead, which would put a dispute on the wrong order.
      *
      * @param array<string, mixed> $object
      */
@@ -146,14 +147,6 @@ final class OrderSync
         $escrowId = $object['escrow_id'] ?? null;
         if (!is_string($escrowId) || $escrowId === '') {
             return null;
-        }
-        $orders = wc_get_orders([
-            'limit' => 1,
-            'payment_method' => Plugin::GATEWAY_ID,
-            'meta_query' => [['key' => self::META_ESCROW, 'value' => $escrowId]], // phpcs:ignore WordPress.DB.SlowDBQuery
-        ]);
-        if (is_array($orders) && ($orders[0] ?? null) instanceof \WC_Order) {
-            return $orders[0];
         }
 
         return self::orderFromMetadata(Plugin::client()->escrows->retrieve($escrowId)->toArray());

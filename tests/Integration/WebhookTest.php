@@ -98,10 +98,11 @@ final class WebhookTest extends IntegrationTestCase
         self::assertSame((float) $order->get_total(), (float) $order->get_total_refunded());
     }
 
-    public function testADisputeFindsTheOrderByItsEscrowAndHoldsIt(): void
+    public function testADisputeFindsTheOrderThroughItsEscrowAndHoldsIt(): void
     {
         $order = $this->sentToKetaPay($this->order());
         $this->webhook('escrow.funded', $this->escrow($order));
+        $this->api->on('GET', '/escrows/esc_' . $order->get_id(), 200, $this->escrow($order));
 
         $this->webhook('dispute.opened', [
             'object' => 'dispute', 'id' => 'dsp_1', 'escrow_id' => 'esc_' . $order->get_id(),
@@ -109,7 +110,7 @@ final class WebhookTest extends IntegrationTestCase
         ]);
 
         self::assertSame('on-hold', $this->reload($order)->get_status());
-        self::assertSame([], $this->api->calls(), 'found from the stored escrow id, no API call');
+        self::assertSame(['GET /escrows/esc_' . $order->get_id()], $this->api->calls());
     }
 
     public function testADisputeBeforeThePaymentWebhookAsksKetaPayWhichOrderItIs(): void
@@ -141,10 +142,29 @@ final class WebhookTest extends IntegrationTestCase
         self::assertSame('cancelled', $this->reload($order)->get_status());
     }
 
+    public function testADisputeNeverLandsOnAnotherOrder(): void
+    {
+        // Regression: the order was looked up with wc_get_orders + meta_query, which some order storage
+        // setups ignore, returning the newest KetaPay order instead of the dispute's.
+        $disputed = $this->sentToKetaPay($this->order());
+        $this->webhook('escrow.funded', $this->escrow($disputed));
+        $newest = $this->sentToKetaPay($this->order());
+        $this->webhook('escrow.funded', $this->escrow($newest));
+        $this->api->on('GET', '/escrows/esc_' . $disputed->get_id(), 200, $this->escrow($disputed));
+
+        $this->webhook('dispute.opened', [
+            'object' => 'dispute', 'id' => 'dsp_3', 'escrow_id' => 'esc_' . $disputed->get_id(),
+            'opened_by' => 'buyer', 'reason' => 'damaged', 'url' => 'https://app.ketapay.com/disputes/dsp_3',
+        ]);
+
+        self::assertSame('on-hold', $this->reload($disputed)->get_status());
+        self::assertSame('processing', $this->reload($newest)->get_status());
+    }
+
     public function testFailingToProcessAnswers500SoKetaPayRetries(): void
     {
         $order = $this->sentToKetaPay($this->order());
-        // Not stored yet and KetaPay can't be reached: try again later.
+        // KetaPay can't be reached to find the escrow's order: try again later.
         $this->api->on('GET', '/escrows/esc_unknown', 503, ['error' => ['type' => 'api_error', 'code' => 'unavailable', 'message' => 'down']]);
 
         $response = $this->webhook('payout.sent', ['object' => 'payout', 'escrow_id' => 'esc_unknown', 'amount' => 1]);
