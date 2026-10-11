@@ -1,0 +1,45 @@
+# Secret scanning: gitleaks' built-in rules (npm, GitHub, AWS, JWTs, private keys...) plus KetaPay's
+# own formats, which no generic scanner knows. Runs in CI on every push and PR (the Secrets check).
+# GitHub's own secret scanning and push protection run on top of this.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "ketapay-live-secret-key"
+description = "KetaPay live secret key"
+regex = '''sk_live_[A-Za-z0-9]{16,}'''
+keywords = ["sk_live_"]
+
+[[rules]]
+id = "ketapay-test-secret-key"
+description = "KetaPay test secret key (a real one, not a placeholder)"
+regex = '''sk_test_[A-Za-z0-9]{24,}'''
+keywords = ["sk_test_"]
+
+[[rules]]
+id = "ketapay-customer-token"
+description = "KetaPay customer token"
+regex = '''ctk_(live|test)_[A-Za-z0-9]{24,}'''
+keywords = ["ctk_"]
+
+[[rules]]
+id = "ketapay-webhook-secret"
+description = "KetaPay webhook signing secret"
+regex = '''whsec_[A-Za-z0-9]{24,}'''
+keywords = ["whsec_"]
+
+[[rules]]
+id = "supabase-project-url"
+description = "Supabase project URL (KetaPay's backend is not public)"
+regex = '''[a-z]{20}\.supabase\.co'''
+keywords = ["supabase.co"]
+
+[[allowlists]]
+description = "Documented sample values from the public API spec"
+regexTarget = "match"
+regexes = [
+  '''whsec_9f8c1e2d7b6a5f4e3d2c1b0a9f8e7d6c''',
+  '''whsec_2b7d9f1e3c5a8b0d4f6e2a9c7b1d3f5e''',
+  '''ctk_test_4f9a2c7e1b8d6a3f5e0c9b2d7a1e4f8c''',
+]

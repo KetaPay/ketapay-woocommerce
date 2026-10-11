@@ -1,0 +1,10 @@
+#!/bin/sh
+# Runs before every `git push` and refuses the push if a check fails. Installed by `composer install`.
+# Integration tests need Docker (wp-env), so they run in CI, not here.
+set -e
+echo "pre-push: versions, formatting, static analysis, unit tests"
+scripts/check-versions.sh
+vendor/bin/php-cs-fixer fix --dry-run --show-progress=none
+vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+vendor/bin/phpunit --testsuite unit --no-progress
+echo "pre-push: all checks passed"

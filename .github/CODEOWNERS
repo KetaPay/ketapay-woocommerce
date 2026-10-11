@@ -1,0 +1,3 @@
+# Owners are asked to review every PR that touches their files.
+# Becomes enforceable (required review) once branch protection is on.
+* @dudox

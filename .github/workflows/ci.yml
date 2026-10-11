@@ -1,0 +1,207 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call: # the release workflow runs this whole suite on the release commit before attaching the zip
+    inputs:
+      ref:
+        description: Git ref to check (defaults to the triggering commit)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+# Until ketapay/ketapay-php is on Packagist, composer.json reads it from ../ketapay-php, so the jobs
+# check it out next to this repo. Once it is published, drop the path repository and that checkout.
+jobs:
+  pr-title:
+    name: PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conventional commit title (release notes are built from it)
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|perf|refactor|docs|test|build|ci|chore|revert)(\([a-z0-9._-]+\))?!?: .+'
+          if [[ ! "$TITLE" =~ $pattern ]]; then
+            echo "::error::PR title must be a conventional commit, like 'feat: add refunds' or 'fix(webhooks): ...'."
+            exit 1
+          fi
+
+  secrets:
+    name: Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0 # the whole history: a secret removed in a later commit is still exposed
+      - name: No secrets anywhere in the history (gitleaks, with KetaPay's own patterns in .gitleaks.toml)
+        env:
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
+          ./gitleaks git --config .gitleaks.toml --redact --no-banner --log-opts="--all" .
+
+  quality:
+    name: Format, lint, types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          path: ketapay-woocommerce
+      - uses: actions/checkout@v7
+        with:
+          repository: KetaPay/ketapay-php
+          ref: main
+          path: ketapay-php
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - uses: ramsey/composer-install@v3
+        with:
+          working-directory: ketapay-woocommerce
+      - name: composer.json is valid
+        working-directory: ketapay-woocommerce
+        run: composer validate --strict --no-check-publish --no-check-lock
+      - name: Versions agree (plugin header, readme.txt, Plugin::VERSION, version.txt)
+        working-directory: ketapay-woocommerce
+        run: scripts/check-versions.sh
+      - name: Formatting
+        working-directory: ketapay-woocommerce
+        run: composer format:check
+      - name: Static analysis (PHPStan level max, WordPress + WooCommerce stubs)
+        working-directory: ketapay-woocommerce
+        run: composer lint
+      - name: The main plugin file parses on old PHP (so old hosts get a notice, not a fatal error)
+        run: docker run --rm -v "$PWD/ketapay-woocommerce:/app" -w /app php:7.4-cli php -l ketapay-woocommerce.php
+
+  unit:
+    name: Unit tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          path: ketapay-woocommerce
+      - uses: actions/checkout@v7
+        with:
+          repository: KetaPay/ketapay-php
+          ref: main
+          path: ketapay-php
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - uses: ramsey/composer-install@v3
+        with:
+          working-directory: ketapay-woocommerce
+      - name: Unit tests
+        working-directory: ketapay-woocommerce
+        run: vendor/bin/phpunit --testsuite unit --no-progress --testdox
+
+  contract:
+    name: Contract tests (plugin vs API spec)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          path: ketapay-woocommerce
+      - uses: actions/checkout@v7
+        with:
+          repository: KetaPay/ketapay-php
+          ref: main
+          path: ketapay-php
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: ramsey/composer-install@v3
+        with:
+          working-directory: ketapay-woocommerce
+      - name: Every request the plugin makes, against a Prism mock of the SDK's spec copy
+        working-directory: ketapay-woocommerce
+        run: composer test:contract -- --no-progress --testdox
+
+  integration:
+    name: Integration (WordPress + WooCommerce, PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.4']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          path: ketapay-woocommerce
+      - uses: actions/checkout@v7
+        with:
+          repository: KetaPay/ketapay-php
+          ref: main
+          path: ketapay-php
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - uses: ramsey/composer-install@v3
+        with:
+          working-directory: ketapay-woocommerce
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ketapay-woocommerce/package-lock.json
+      - name: Start WordPress with the latest WooCommerce and this plugin
+        working-directory: ketapay-woocommerce
+        env:
+          WP_ENV_PHP_VERSION: ${{ matrix.php }}
+        run: |
+          npm ci
+          npx wp-env start
+      - name: Integration tests
+        working-directory: ketapay-woocommerce
+        run: npm run test:integration -- --no-progress --testdox
+
+  build:
+    name: Plugin zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          path: ketapay-woocommerce
+      - uses: actions/checkout@v7
+        with:
+          repository: KetaPay/ketapay-php
+          ref: main
+          path: ketapay-php
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+      - name: Build the zip (production dependencies only)
+        working-directory: ketapay-woocommerce
+        run: scripts/build.sh
+      - name: The zip loads on PHP 8.1 without dev dependencies
+        working-directory: ketapay-woocommerce/build/ketapay-woocommerce
+        run: |
+          php -r 'require "vendor/autoload.php"; foreach (["KetaPay\\KetaPay", "KetaPay\\WooCommerce\\Checkout\\SessionParams", "KetaPay\\WooCommerce\\Orders\\EventRules"] as $c) { class_exists($c) or exit("missing $c\n"); } echo "ok\n";'
+      - uses: actions/upload-artifact@v5
+        with:
+          name: ketapay-woocommerce
+          path: ketapay-woocommerce/build/*.zip
