@@ -33,6 +33,13 @@ Details that matter:
 
 The plugin can't deliver, release or refund: those need the seller's or buyer's one-time code, so a leaked store key can't move escrowed money.
 
+## To do later
+
+- **Return link query string (spec).** The spec says KetaPay appends `?checkout_session_id=<id>` to `return_url`. WooCommerce's return link already has `?key=...`, so a literal append turns the order key into `wc_order_abc?checkout_session_id=...`: the order-received page rejects it and the return-page check never runs (the webhook still marks the order paid). Fix in the spec: add the parameter with `&` when the URL already has a query. Affects every integrator with a query in `return_url`.
+- **Seller is a person, not the business.** Escrow parties are always people, so a store's money goes to the owner's personal KetaPay account (and their personal KYC). The spec allows it; whether businesses should be sellers (payout to an organisation account) is an open product decision.
+- **Verify against the real API.** Everything is tested against the spec (Prism) and a fake API. Once `api-v1` is on staging: one sandbox order end to end (pay with the test helper, Processing, then Completed).
+- **Not built yet:** multi-vendor (Dokan, WCFM), refunds from the WooCommerce order screen, translated order notes, WordPress.org listing, Packagist for ketapay-php (then drop the path repository).
+
 ## Code
 
 ```
