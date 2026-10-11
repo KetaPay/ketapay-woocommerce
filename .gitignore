@@ -1,0 +1,10 @@
+/vendor/
+/node_modules/
+/coverage/
+/reports/
+/build/
+/.phpunit.cache/
+/.phpstan-cache/
+/.php-cs-fixer.cache
+.env
+.DS_Store
