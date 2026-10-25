@@ -11,5 +11,8 @@
     },
     "devDependencies": {
         "@wordpress/env": "11.17.0"
+    },
+    "overrides": {
+        "qs": "^6.16.0"
     }
 }
