@@ -25,7 +25,8 @@ final class CheckoutTest extends IntegrationTestCase
         $body = $this->api->body(0);
         self::assertSame(4_700_000, $body['amount']);
         self::assertSame(['email' => 'buyer@example.com', 'phone' => '+2348012345678'], $body['buyer']);
-        self::assertSame(['email' => 'shop@example.com'], $body['seller']);
+        self::assertArrayNotHasKey('seller', $body);
+        self::assertSame(['method' => 'buyer_confirms', 'inspection_hours' => 72], $body['release']);
         self::assertSame((string) $order->get_id(), $body['external_reference']);
         self::assertSame(['wc_order_id' => (string) $order->get_id(), 'wc_site' => Plugin::siteId()], $body['metadata']);
         self::assertIsString($body['description']);
@@ -112,7 +113,7 @@ final class CheckoutTest extends IntegrationTestCase
 
         update_option('woocommerce_ketapay_settings', ['enabled' => 'yes', 'secret_key' => 'sk_test_x']);
         WC()->payment_gateways()->init();
-        self::assertFalse($this->gateway()->is_available(), 'no seller email or webhook secret');
+        self::assertFalse($this->gateway()->is_available(), 'no webhook secret');
     }
 
     public function testHiddenForStoresNotInNaira(): void

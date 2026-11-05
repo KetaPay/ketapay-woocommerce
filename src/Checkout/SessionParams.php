@@ -42,25 +42,20 @@ final class SessionParams
             $buyer['phone'] = $phone;
         }
 
-        $seller = ['email' => $settings->sellerEmail];
-        if ($settings->sellerPhone !== null) {
-            $seller['phone'] = $settings->sellerPhone;
-        }
-
         $release = ['method' => $settings->releaseMethod];
         if ($settings->releaseMethod === 'buyer_confirms') {
-            $release['auto_release_hours'] = $settings->autoReleaseHours;
+            $release['inspection_hours'] = $settings->inspectionHours;
         }
 
         $params = [
             'amount' => Money::toKobo($order->total),
             'currency' => 'NGN',
-            'category' => $settings->category,
             'title' => self::truncate("Order #{$order->number} from {$order->storeName}", self::TITLE_MAX),
             'description' => self::description($order),
             'url' => $order->viewUrl,
             'buyer' => $buyer,
-            'seller' => $seller,
+            // No seller: the store sells its own goods, so its KetaPay business is the seller and
+            // each release is paid into its KetaPay balance. Naming a seller is for platforms.
             'release' => $release,
             'return_url' => $order->returnUrl,
             'cancel_url' => $order->cancelUrl,

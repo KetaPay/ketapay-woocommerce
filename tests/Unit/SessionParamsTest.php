@@ -16,11 +16,11 @@ final class SessionParamsTest extends TestCase
 
         self::assertSame(4_700_000, $params['amount']);
         self::assertSame('NGN', $params['currency'] ?? null);
-        self::assertSame('goods', $params['category'] ?? null);
         self::assertSame('Order #1042 from Ada Fabrics', $params['title']);
         self::assertSame(['email' => 'buyer@example.com', 'phone' => '+2348012345678'], $params['buyer']);
-        self::assertSame(['email' => 'shop@example.com'], $params['seller']);
-        self::assertSame(['method' => 'buyer_confirms', 'auto_release_hours' => 72], $params['release'] ?? null);
+        self::assertArrayNotHasKey('seller', $params, 'the store sells its own goods: its KetaPay business is the seller');
+        self::assertArrayNotHasKey('category', $params);
+        self::assertSame(['method' => 'buyer_confirms', 'inspection_hours' => 72], $params['release'] ?? null);
         self::assertSame('https://shop.example.com/checkout/order-received/1042/?key=wc_order_abc', $params['return_url'] ?? null);
         self::assertSame('https://shop.example.com/my-account/view-order/1042/', $params['url'] ?? null);
         self::assertSame('1042', $params['external_reference'] ?? null);
@@ -65,25 +65,18 @@ final class SessionParamsTest extends TestCase
         self::assertSame(['email' => 'buyer@example.com'], $params['buyer']);
     }
 
-    public function testSellerPhoneIsSentWhenSet(): void
-    {
-        $params = SessionParams::build(Fixtures::order(), Fixtures::settings(['seller_phone' => '08031234567']), 'site-1');
-
-        self::assertSame(['email' => 'shop@example.com', 'phone' => '+2348031234567'], $params['seller']);
-    }
-
-    public function testReleaseCodeHasNoAutoRelease(): void
+    public function testReleaseCodeHasNoInspectionPeriod(): void
     {
         $params = SessionParams::build(Fixtures::order(), Fixtures::settings(['release_method' => 'release_code']), 'site-1');
 
         self::assertSame(['method' => 'release_code'], $params['release'] ?? null);
     }
 
-    public function testNeverAutoReleaseSendsNull(): void
+    public function testChosenInspectionPeriodIsSent(): void
     {
-        $params = SessionParams::build(Fixtures::order(), Fixtures::settings(['auto_release_hours' => '']), 'site-1');
+        $params = SessionParams::build(Fixtures::order(), Fixtures::settings(['inspection_hours' => '168']), 'site-1');
 
-        self::assertSame(['method' => 'buyer_confirms', 'auto_release_hours' => null], $params['release'] ?? null);
+        self::assertSame(['method' => 'buyer_confirms', 'inspection_hours' => 168], $params['release'] ?? null);
     }
 
     public function testOnlyPublicHttpsImagesAreSentAtMostTen(): void

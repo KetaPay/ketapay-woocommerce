@@ -70,16 +70,6 @@ final class Gateway extends \WC_Payment_Gateway
                     ? $inConfig
                     : __('From your KetaPay dashboard, under Developers. sk_test_ keys use the sandbox: no real money moves. Safer: define KETAPAY_SECRET_KEY in wp-config.php instead.', 'ketapay-woocommerce'),
             ],
-            'seller_email' => [
-                'title' => __('Seller email', 'ketapay-woocommerce'),
-                'type' => 'email',
-                'description' => __('The KetaPay account that receives the money. It is the seller on every order.', 'ketapay-woocommerce'),
-            ],
-            'seller_phone' => [
-                'title' => __('Seller phone (optional)', 'ketapay-woocommerce'),
-                'type' => 'text',
-                'placeholder' => '+2348012345678',
-            ],
             'webhook_secret' => [
                 'title' => __('Webhook signing secret', 'ketapay-woocommerce'),
                 'type' => 'password',
@@ -95,19 +85,6 @@ final class Gateway extends \WC_Payment_Gateway
                 'title' => __('How the money is released', 'ketapay-woocommerce'),
                 'type' => 'title',
             ],
-            'category' => [
-                'title' => __('What you sell', 'ketapay-woocommerce'),
-                'type' => 'select',
-                'default' => 'goods',
-                'options' => [
-                    'goods' => __('Goods', 'ketapay-woocommerce'),
-                    'services' => __('Services', 'ketapay-woocommerce'),
-                    'digital' => __('Digital products', 'ketapay-woocommerce'),
-                    'vehicle' => __('Vehicles', 'ketapay-woocommerce'),
-                    'property' => __('Property', 'ketapay-woocommerce'),
-                    'other' => __('Other', 'ketapay-woocommerce'),
-                ],
-            ],
             'release_method' => [
                 'title' => __('Release', 'ketapay-woocommerce'),
                 'type' => 'select',
@@ -117,19 +94,18 @@ final class Gateway extends \WC_Payment_Gateway
                     'release_code' => __('Buyer gives you a 6-digit code at handover (pickup, in person)', 'ketapay-woocommerce'),
                 ],
             ],
-            'auto_release_hours' => [
-                'title' => __('Release automatically', 'ketapay-woocommerce'),
+            'inspection_hours' => [
+                'title' => __('Buyer\'s inspection period', 'ketapay-woocommerce'),
                 'type' => 'select',
                 'default' => '72',
-                'description' => __('After you mark an order delivered, if the buyer neither confirms nor reports a problem. Only with "Buyer confirms".', 'ketapay-woocommerce'),
+                'description' => __('How long the buyer has, after you mark an order delivered, to confirm it or report a problem. Nothing releases on its own when it ends: you can then report the buyer as unresponsive and KetaPay decides. Only with "Buyer confirms".', 'ketapay-woocommerce'),
                 'options' => [
-                    '' => __('Never: the buyer must confirm', 'ketapay-woocommerce'),
-                    '24' => __('After 1 day', 'ketapay-woocommerce'),
-                    '48' => __('After 2 days', 'ketapay-woocommerce'),
-                    '72' => __('After 3 days', 'ketapay-woocommerce'),
-                    '168' => __('After 7 days', 'ketapay-woocommerce'),
-                    '336' => __('After 14 days', 'ketapay-woocommerce'),
-                    '720' => __('After 30 days', 'ketapay-woocommerce'),
+                    '24' => __('1 day', 'ketapay-woocommerce'),
+                    '48' => __('2 days', 'ketapay-woocommerce'),
+                    '72' => __('3 days', 'ketapay-woocommerce'),
+                    '168' => __('7 days', 'ketapay-woocommerce'),
+                    '336' => __('14 days', 'ketapay-woocommerce'),
+                    '720' => __('30 days', 'ketapay-woocommerce'),
                 ],
             ],
             'send_images' => [

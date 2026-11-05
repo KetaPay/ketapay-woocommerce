@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace KetaPay\WooCommerce;
 
-use KetaPay\WooCommerce\Checkout\Phone;
-
 /**
  * The gateway's settings, read once and checked. Keys can come from wp-config.php constants
  * (KETAPAY_SECRET_KEY, KETAPAY_WEBHOOK_SECRET), which win over the settings page, so they never
@@ -13,24 +11,20 @@ use KetaPay\WooCommerce\Checkout\Phone;
  */
 final class Settings
 {
-    public const CATEGORIES = ['goods', 'services', 'property', 'vehicle', 'digital', 'other'];
     public const RELEASE_METHODS = ['buyer_confirms', 'release_code'];
-    /** Choices offered for auto release; '' means never (the buyer must release). */
-    public const AUTO_RELEASE_CHOICES = ['', '24', '48', '72', '168', '336', '720'];
+    /** Choices offered for the buyer's inspection period, in hours (the API takes 24 to 720). */
+    public const INSPECTION_CHOICES = ['24', '48', '72', '168', '336', '720'];
+    public const DEFAULT_INSPECTION_HOURS = 72;
 
     /**
      * @param list<string> $webhookSecrets newest first; two while a secret is being rotated
-     * @param 'goods'|'services'|'property'|'vehicle'|'digital'|'other' $category
      * @param 'buyer_confirms'|'release_code' $releaseMethod
      */
     public function __construct(
         public readonly string $secretKey,
         public readonly array $webhookSecrets,
-        public readonly string $sellerEmail,
-        public readonly ?string $sellerPhone,
-        public readonly string $category,
         public readonly string $releaseMethod,
-        public readonly ?int $autoReleaseHours,
+        public readonly int $inspectionHours,
         public readonly bool $sendImages,
         public readonly bool $debug,
     ) {}
@@ -46,20 +40,14 @@ final class Settings
         // A comma-separated pair keeps the old secret working while it is rotated.
         $webhookSecrets = array_values(array_filter(array_map('trim', explode(',', $webhookSecret))));
 
-        $category = self::string($options, 'category');
         $releaseMethod = self::string($options, 'release_method');
-        $autoRelease = self::string($options, 'auto_release_hours', '72');
+        $inspection = self::string($options, 'inspection_hours');
 
         return new self(
             secretKey: $secretKey,
             webhookSecrets: $webhookSecrets,
-            sellerEmail: trim(self::string($options, 'seller_email')),
-            sellerPhone: Phone::normalise(self::string($options, 'seller_phone')),
-            category: in_array($category, self::CATEGORIES, true) ? $category : 'goods',
             releaseMethod: in_array($releaseMethod, self::RELEASE_METHODS, true) ? $releaseMethod : 'buyer_confirms',
-            autoReleaseHours: in_array($autoRelease, self::AUTO_RELEASE_CHOICES, true) && $autoRelease !== ''
-                ? (int) $autoRelease
-                : null,
+            inspectionHours: in_array($inspection, self::INSPECTION_CHOICES, true) ? (int) $inspection : self::DEFAULT_INSPECTION_HOURS,
             sendImages: self::string($options, 'send_images', 'yes') === 'yes',
             debug: self::string($options, 'debug', 'no') === 'yes',
         );
@@ -75,9 +63,6 @@ final class Settings
         $problems = [];
         if (!preg_match('/^sk_(test|live)_/', $this->secretKey)) {
             $problems[] = 'Add your KetaPay secret key (it starts with sk_test_ or sk_live_).';
-        }
-        if (filter_var($this->sellerEmail, FILTER_VALIDATE_EMAIL) === false) {
-            $problems[] = 'Add the email address of the KetaPay account that receives the money.';
         }
         if ($this->webhookSecrets === []) {
             $problems[] = 'Add the webhook signing secret, so orders update when buyers pay.';

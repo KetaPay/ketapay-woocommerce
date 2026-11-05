@@ -10,11 +10,11 @@ Store owners: see [readme.txt](readme.txt) for setup and the FAQ.
 
 | Step | KetaPay | WooCommerce order |
 | --- | --- | --- |
-| Buyer picks KetaPay at checkout | Checkout session created from the order (line items, total, buyer email and phone, product photos) | Pending, redirected to KetaPay |
+| Buyer picks KetaPay at checkout | Checkout session created from the order (line items, total, buyer email and phone, product photos), with no `seller`: the store's KetaPay business sells, and releases go to its KetaPay balance | Pending, redirected to KetaPay |
 | Buyer pays | `escrow.funded` | Processing (paid; transaction id = escrow id) |
 | Paid amount differs from the order total | `escrow.funded` | On hold, with a note |
 | Store marks delivered in KetaPay | `milestone.delivered` | Note |
-| Buyer releases (or auto release) | `escrow.completed` | Completed |
+| Buyer releases | `escrow.completed` | Completed |
 | Buyer or seller reports a problem | `dispute.opened` / `dispute.resolved` | On hold, then back to Processing |
 | KetaPay refunds the buyer | `escrow.refunded` | Refunded (refund recorded) |
 | Link not paid in time | `checkout_session.expired` | Cancelled |
@@ -31,12 +31,11 @@ Details that matter:
 - **Setup**: saving a secret key registers the webhook (or rotates its secret if the URL is already registered, so events never arrive twice) and stores the signing secret.
 - **HTTP** goes through `wp_remote_request` (`WordPressTransport`), so the site's proxy and certificate settings apply.
 
-The plugin can't deliver, release or refund: those need the seller's or buyer's one-time code, so a leaked store key can't move escrowed money.
+The plugin doesn't deliver, release or refund: the store does that in the KetaPay dashboard. After delivery the buyer has the inspection period chosen in the settings (1 to 30 days, 3 by default) to confirm or report a problem; nothing releases on its own, and when it ends the store can report the buyer as unresponsive.
 
 ## To do later
 
 - **Return link query string (spec).** The spec says KetaPay appends `?checkout_session_id=<id>` to `return_url`. WooCommerce's return link already has `?key=...`, so a literal append turns the order key into `wc_order_abc?checkout_session_id=...`: the order-received page rejects it and the return-page check never runs (the webhook still marks the order paid). Fix in the spec: add the parameter with `&` when the URL already has a query. Affects every integrator with a query in `return_url`.
-- **Seller is a person, not the business.** Escrow parties are always people, so a store's money goes to the owner's personal KetaPay account (and their personal KYC). The spec allows it; whether businesses should be sellers (payout to an organisation account) is an open product decision.
 - **Verify against the real API.** Everything is tested against the spec (Prism) and a fake API. Once `api-v1` is on staging: one sandbox order end to end (pay with the test helper, Processing, then Completed).
 - **Not built yet:** multi-vendor (Dokan, WCFM), refunds from the WooCommerce order screen, translated order notes, WordPress.org listing.
 

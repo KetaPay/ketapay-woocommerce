@@ -13,9 +13,8 @@ final class SettingsTest extends TestCase
     {
         $settings = Settings::from([]);
 
-        self::assertSame('goods', $settings->category);
         self::assertSame('buyer_confirms', $settings->releaseMethod);
-        self::assertSame(72, $settings->autoReleaseHours);
+        self::assertSame(72, $settings->inspectionHours);
         self::assertTrue($settings->sendImages);
         self::assertFalse($settings->debug);
         self::assertSame([], $settings->webhookSecrets);
@@ -23,17 +22,16 @@ final class SettingsTest extends TestCase
 
     public function testListsWhatStopsCheckoutInPlainWords(): void
     {
-        $problems = Settings::from(['secret_key' => 'pk_test_123', 'seller_email' => 'not an email'])->problems();
+        $problems = Settings::from(['secret_key' => 'pk_test_123'])->problems();
 
-        self::assertCount(3, $problems);
+        self::assertCount(2, $problems);
         self::assertStringContainsString('secret key', $problems[0]);
-        self::assertStringContainsString('email', $problems[1]);
-        self::assertStringContainsString('webhook', $problems[2]);
+        self::assertStringContainsString('webhook', $problems[1]);
     }
 
-    public function testReadyWhenKeyEmailAndWebhookSecretAreSet(): void
+    public function testReadyWhenKeyAndWebhookSecretAreSet(): void
     {
-        $settings = Settings::from(['secret_key' => 'sk_live_abc', 'seller_email' => 'shop@example.com', 'webhook_secret' => 'whsec_1']);
+        $settings = Settings::from(['secret_key' => 'sk_live_abc', 'webhook_secret' => 'whsec_1']);
 
         self::assertSame([], $settings->problems());
         self::assertFalse($settings->isTestMode());
@@ -57,22 +55,16 @@ final class SettingsTest extends TestCase
 
     public function testUnknownChoicesFallBackToSafeDefaults(): void
     {
-        $settings = Settings::from(['category' => 'cars', 'release_method' => 'instant', 'auto_release_hours' => '5']);
+        $settings = Settings::from(['release_method' => 'instant', 'inspection_hours' => '5']);
 
-        self::assertSame('goods', $settings->category);
         self::assertSame('buyer_confirms', $settings->releaseMethod);
-        self::assertNull($settings->autoReleaseHours); // never release without the buyer, rather than guess
+        self::assertSame(72, $settings->inspectionHours); // the API's own default, rather than guess
     }
 
-    public function testNeverAutoRelease(): void
+    public function testStoresSavedBeforeTheInspectionPeriodGetTheDefault(): void
     {
-        self::assertNull(Settings::from(['auto_release_hours' => ''])->autoReleaseHours);
-    }
-
-    public function testSellerPhoneIsNormalisedOrDropped(): void
-    {
-        self::assertSame('+2348031234567', Settings::from(['seller_phone' => '0803 123 4567'])->sellerPhone);
-        self::assertNull(Settings::from(['seller_phone' => '12345'])->sellerPhone);
+        // Old installs saved auto_release_hours ('' meant never); the API no longer has it
+        self::assertSame(72, Settings::from(['auto_release_hours' => ''])->inspectionHours);
     }
 
     public function testNonScalarOptionsAreIgnored(): void
