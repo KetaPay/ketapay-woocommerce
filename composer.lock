@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "ketapay/ketapay-php",
-            "version": "v0.1.0-beta.1",
+            "version": "v0.1.0-beta.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KetaPay/ketapay-php.git",
-                "reference": "58f803e2a4348a8ecce9b7a654a5d3100f430dfa"
+                "reference": "d4332bc385da7939d3ae2c5a6f1b2767c5ba3437"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KetaPay/ketapay-php/zipball/58f803e2a4348a8ecce9b7a654a5d3100f430dfa",
-                "reference": "58f803e2a4348a8ecce9b7a654a5d3100f430dfa",
+                "url": "https://api.github.com/repos/KetaPay/ketapay-php/zipball/d4332bc385da7939d3ae2c5a6f1b2767c5ba3437",
+                "reference": "d4332bc385da7939d3ae2c5a6f1b2767c5ba3437",
                 "shasum": ""
             },
             "require": {
@@ -59,9 +59,9 @@
             "support": {
                 "docs": "https://docs.ketapay.com",
                 "issues": "https://github.com/KetaPay/ketapay-php/issues",
-                "source": "https://github.com/KetaPay/ketapay-php/tree/v0.1.0-beta.1"
+                "source": "https://github.com/KetaPay/ketapay-php/tree/v0.1.0-beta.3"
             },
-            "time": "2026-10-11T13:13:30+00:00"
+            "time": "2026-10-25T03:59:12+00:00"
         }
     ],
     "packages-dev": [
