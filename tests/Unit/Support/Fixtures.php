@@ -19,7 +19,6 @@ final class Fixtures
         return Settings::from($options + [
             'secret_key' => 'sk_test_51abc',
             'webhook_secret' => 'whsec_test',
-            'seller_email' => 'shop@example.com',
         ]);
     }
 

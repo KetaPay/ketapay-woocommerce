@@ -34,10 +34,9 @@ final class RequestsTest extends TestCase
     public static function sessions(): iterable
     {
         yield 'defaults' => [[], Fixtures::order()];
-        yield 'release code, seller phone' => [['release_method' => 'release_code', 'seller_phone' => '08031234567'], Fixtures::order()];
-        yield 'never auto release' => [['auto_release_hours' => ''], Fixtures::order()];
-        yield 'longest auto release, services' => [['auto_release_hours' => '720', 'category' => 'services'], Fixtures::order()];
-        yield 'every category' => [['category' => 'property'], Fixtures::order()];
+        yield 'release code' => [['release_method' => 'release_code'], Fixtures::order()];
+        yield 'shortest inspection period' => [['inspection_hours' => '24'], Fixtures::order()];
+        yield 'longest inspection period' => [['inspection_hours' => '720'], Fixtures::order()];
         yield 'product photos' => [[], Fixtures::order(imageUrls: array_map(static fn(int $i): string => "https://cdn.example.com/$i.jpg", range(1, 12)))];
         yield 'buyer without a usable phone' => [[], Fixtures::order(phone: '+44 7700 900123')];
         yield 'no line items' => [[], Fixtures::order(total: '1', items: [], shippingMethod: null, storeName: 'Y')];

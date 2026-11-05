@@ -22,10 +22,8 @@ abstract class IntegrationTestCase extends TestCase
             'description' => 'Pay safely.',
             'secret_key' => 'sk_test_fake',
             'webhook_secret' => self::WEBHOOK_SECRET,
-            'seller_email' => 'shop@example.com',
-            'category' => 'goods',
             'release_method' => 'buyer_confirms',
-            'auto_release_hours' => '72',
+            'inspection_hours' => '72',
             'send_images' => 'yes',
         ]);
         WC()->payment_gateways()->init();

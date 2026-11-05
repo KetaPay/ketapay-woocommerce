@@ -18,7 +18,7 @@ How an order goes:
 
 1. At checkout the buyer chooses "Pay with KetaPay escrow" and pays on KetaPay by card or bank transfer.
 2. The order moves to **Processing**. The money is held in escrow; you ship.
-3. You mark the order delivered in KetaPay. The buyer confirms, or the money releases on its own after the wait you chose (for example 3 days) if they don't respond.
+3. You mark the order delivered in KetaPay. The buyer has the inspection period you chose (3 days by default) to confirm or report a problem. If they don't respond, you can report them as unresponsive and KetaPay decides.
 4. KetaPay pays you and the order moves to **Completed**.
 
 If the buyer reports a problem, the order goes **On hold** and KetaPay handles the dispute with both of you. If KetaPay refunds the buyer, the order moves to **Refunded**. Every step adds an order note.
@@ -36,9 +36,10 @@ Fees: KetaPay adds 1.5% plus VAT to what the buyer pays and takes 1.5% from your
 1. Install and activate the plugin. WooCommerce must be active.
 2. Go to **WooCommerce > Settings > Payments > KetaPay escrow**.
 3. Paste your secret key from the KetaPay dashboard (Developers). Start with an `sk_test_` key: no real money moves.
-4. Enter the email of the KetaPay account that should receive the money.
-5. Save. The plugin registers its webhook with KetaPay and fills in the signing secret.
-6. Place a test order, then switch to your `sk_live_` key.
+4. Save. The plugin registers its webhook with KetaPay and fills in the signing secret.
+5. Place a test order, then switch to your `sk_live_` key.
+
+Payments go to your KetaPay business: your business is the seller on every order, and each release is paid into its KetaPay balance.
 
 Safer: put the keys in `wp-config.php` instead of the database:
 
@@ -49,11 +50,11 @@ Safer: put the keys in `wp-config.php` instead of the database:
 
 = Can I refund from the WooCommerce order screen? =
 
-Not yet. Cancel the escrow in KetaPay; the order moves to Refunded on its own.
+Not yet. Refund it in your KetaPay dashboard; the order moves to Refunded on its own.
 
 = Why do I mark orders delivered in KetaPay, not in WooCommerce? =
 
-Moving escrowed money needs proof from you (a one-time code). Your store's API key alone can't release or refund anything, so a stolen key can't move money.
+The plugin only creates payments and follows them. Delivering and refunding happen in your KetaPay dashboard, so the store's API key never needs permission to move escrowed money.
 
 = Does it work with the block checkout? =
 
