@@ -4,7 +4,7 @@
  * Plugin URI:           https://github.com/KetaPay/ketapay-woocommerce
  * Description:          Buyers pay into KetaPay escrow. KetaPay holds the money until they confirm they received their order, then pays you.
  * x-release-please-start-version
- * Version:              0.1.0-beta.1
+ * Version:              0.1.0-beta.2
  * x-release-please-end
  * Requires at least:    6.6
  * Requires PHP:         8.1

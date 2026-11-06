@@ -14,7 +14,7 @@ use KetaPay\WooCommerce\Webhooks\WebhookController;
 /** Wires the gateway into WordPress and WooCommerce, and hands out the shared pieces. */
 final class Plugin
 {
-    public const VERSION = '0.1.0-beta.1'; // x-release-please-version
+    public const VERSION = '0.1.0-beta.2'; // x-release-please-version
     public const GATEWAY_ID = 'ketapay';
     public const LOG_SOURCE = 'ketapay';
     private const SITE_ID_OPTION = 'ketapay_wc_site_id';
