@@ -33,7 +33,17 @@ final class DisputesTest extends TestCase
 
         self::assertSame('on-hold', $update->status);
         self::assertSame(
-            'Buyer reported a problem (not as agreed). KetaPay is handling it and the money stays in escrow until it is settled: https://app.ketapay.com/disputes/dsp_1',
+            'Buyer reported a problem (not as agreed). KetaPay is handling it and the money stays in escrow until it is settled. https://app.ketapay.com/disputes/dsp_1',
+            $update->notes[0],
+        );
+    }
+
+    public function testADisputeWithNoPageEndsTheNoteCleanly(): void
+    {
+        $update = EventRules::decide('dispute.opened', self::dispute(['url' => null]), null, Fixtures::state(status: 'processing', isPaid: true, escrow: 'esc_1'));
+
+        self::assertSame(
+            'Buyer reported a problem (not as agreed). KetaPay is handling it and the money stays in escrow until it is settled.',
             $update->notes[0],
         );
     }

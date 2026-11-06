@@ -8,3 +8,4 @@
 /.php-cs-fixer.cache
 .env
 .DS_Store
+.e2e-env
