@@ -12,7 +12,7 @@ use KetaPay\WooCommerce\Checkout\Money;
  * - escrow.funded: paid (Processing). The money waits in escrow; the store ships.
  * - escrow.completed: released to the store (Completed).
  * - escrow.refunded: returned to the buyer (Refunded).
- * - dispute.opened: On hold until KetaPay settles it; dispute.resolved puts it back to Processing,
+ * - dispute.opened: On hold until it is settled; the store responds in the KetaPay dashboard. dispute.resolved puts it back to Processing,
  *   and the completed or refunded event that follows sets the final status.
  * - checkout_session.expired: an unpaid order is Cancelled.
  * - Deliveries, releases, payouts, refunds and chargebacks add an order note.
@@ -130,7 +130,7 @@ final class EventRules
     {
         $by = self::string($dispute, 'opened_by', 'buyer');
         $note = ucfirst($by) . ' reported a problem (' . str_replace('_', ' ', self::string($dispute, 'reason', 'other'))
-            . '). KetaPay is handling it and the money stays in escrow until it is settled.';
+            . '). The money stays in escrow until it is settled. Respond in your KetaPay dashboard under Disputes.';
         // The API has no dispute page yet, so url is null for now
         $url = self::string($dispute, 'url');
         if ($url !== '') {
