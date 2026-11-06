@@ -64,7 +64,7 @@ final class OutcomesTest extends E2ETestCase
         $this->deliver($this->realEvent('dispute.opened', StagingApi::text($dispute, 'id')));
         self::assertSame('on-hold', $this->reload($order)->get_status());
         self::assertStringContainsString(
-            'Buyer reported a problem (not received). KetaPay is handling it and the money stays in escrow until it is settled.',
+            'Buyer reported a problem (not received). The money stays in escrow until it is settled. Respond in your KetaPay dashboard under Disputes.',
             implode("\n", $this->notes($order)),
         );
     }
