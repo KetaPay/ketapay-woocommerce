@@ -92,6 +92,7 @@ jobs:
         working-directory: ketapay-woocommerce
         env:
           KETAPAY_E2E_RUN_ID: e2e-woo-gh-${{ github.run_id }} # stamped on all test data, for cleanup
+        shell: bash # with pipefail: without it, tee's success would hide failing tests
         run: npm run test:e2e -- --no-progress --testdox | tee e2e-report.txt
       - name: Test report
         if: always() && steps.configured.outputs.yes == 'true'

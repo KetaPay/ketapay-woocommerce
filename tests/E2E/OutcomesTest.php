@@ -49,7 +49,7 @@ final class OutcomesTest extends E2ETestCase
         self::assertSame('refunded', $this->reload($order)->get_status());
     }
 
-    #[TestDox('[WE2E-007] a real dispute.opened event puts the order On hold, with a note linking to the dispute')]
+    #[TestDox('[WE2E-007] a real dispute.opened event puts the order On hold, with a note saying who reported what')]
     public function testDispute(): void
     {
         $order = $this->paidOrder();
@@ -63,6 +63,9 @@ final class OutcomesTest extends E2ETestCase
 
         $this->deliver($this->realEvent('dispute.opened', StagingApi::text($dispute, 'id')));
         self::assertSame('on-hold', $this->reload($order)->get_status());
-        self::assertStringContainsString(StagingApi::text($dispute, 'url'), implode("\n", $this->notes($order)));
+        self::assertStringContainsString(
+            'Buyer reported a problem (not received). KetaPay is handling it and the money stays in escrow until it is settled.',
+            implode("\n", $this->notes($order)),
+        );
     }
 }

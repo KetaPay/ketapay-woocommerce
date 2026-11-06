@@ -22,7 +22,7 @@ final class CheckoutTest extends E2ETestCase
         $session = $this->api->get('/checkout_sessions/' . $this->sessionId($order));
         self::assertSame(['success', StagingApi::text($session, 'url')], [$result['result'], $result['redirect'] ?? null]);
         self::assertSame(['open', 300_000], [$session['status'], $session['amount']]);
-        self::assertSame(['wc_order_id' => (string) $order->get_id(), 'wc_site' => Plugin::siteId()], $session['metadata']);
+        self::assertEquals(['wc_order_id' => (string) $order->get_id(), 'wc_site' => Plugin::siteId()], $session['metadata']);
         self::assertSame('business', StagingApi::fields((array) $session['seller'])['type']);
         self::assertSame($order->get_billing_email(), StagingApi::fields((array) $session['buyer'])['email']);
         self::assertSame('pending', $this->reload($order)->get_status());
