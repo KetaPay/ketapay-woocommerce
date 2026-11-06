@@ -130,7 +130,12 @@ final class EventRules
     {
         $by = self::string($dispute, 'opened_by', 'buyer');
         $note = ucfirst($by) . ' reported a problem (' . str_replace('_', ' ', self::string($dispute, 'reason', 'other'))
-            . '). KetaPay is handling it and the money stays in escrow until it is settled: ' . self::string($dispute, 'url');
+            . '). KetaPay is handling it and the money stays in escrow until it is settled.';
+        // The API has no dispute page yet, so url is null for now
+        $url = self::string($dispute, 'url');
+        if ($url !== '') {
+            $note .= ' ' . $url;
+        }
 
         return new OrderUpdate(status: in_array($order->status, self::FINAL, true) ? null : 'on-hold', notes: [$note]);
     }
