@@ -39,6 +39,7 @@ jobs:
     # Forks and Dependabot can't log in to Infisical, so their pull requests skip this job
     if: github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
     runs-on: ubuntu-latest
+    timeout-minutes: 15 # a normal run takes 1 to 2 minutes
     permissions:
       contents: read
       id-token: write # Infisical login
@@ -60,6 +61,20 @@ jobs:
             echo "### E2E not configured yet: skipped" >> "$GITHUB_STEP_SUMMARY"
             echo "yes=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Is staging answering?
+        if: steps.configured.outputs.yes == 'true'
+        # A down or half-reset staging turned every test into a 60 s timeout (72 minute runs on
+        # 2026-11-07). One cheap authenticated read that needs the database, three tries, then a
+        # clear failure instead of running the suite.
+        run: |
+          for try in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -m 10 -H "Authorization: Bearer $KETAPAY_E2E_SECRET_KEY" "$KETAPAY_E2E_BASE_URL/events?limit=1" || true)
+            [ "$code" = "200" ] && exit 0
+            echo "Try $try: GET /events answered $code"
+            sleep 5
+          done
+          echo "::error::The staging API is not answering (GET /events gave $code), so the tests did not run. Check the latest Deploy Staging run in the api repo."
+          exit 1
       - uses: actions/checkout@v7
         if: steps.configured.outputs.yes == 'true'
         with:
