@@ -28,10 +28,11 @@ on:
 permissions:
   contents: read
 
-# A new push to a pull request replaces its running E2E. Other runs never cancel each other.
+# A newer push to a PR, or a newer merge into main, replaces the running E2E. Nightly, manual and
+# Publish runs keep their own group and are never cancelled.
 concurrency:
-  group: e2e-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: e2e-${{ github.event.pull_request.number || (github.event_name == 'push' && github.workflow == 'E2E' && github.ref) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.workflow == 'E2E') }}
 
 jobs:
   e2e:
